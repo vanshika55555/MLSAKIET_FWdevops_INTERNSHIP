@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Scientific Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: #F4F4F4;
+            margin: 0;
+        }
+        .calculator {
+            background-color: #333333;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            width: 430px;
+            margin-bottom: 20px;
+        }
+        .screen {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.5em;
+            text-align: right;
+            background-color: #FFFFFF;
+            color: #066e7e;
+            border: 2px solid #e24a4a;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        button {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.3s ease;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        button.operator {
+            background-color: #e24a4a;
+            color: white;
+        }
+        button.operator:hover {
+            background-color: #560404;
+        }
+        button.number {
+            background-color: #E0E0E0;
+            color: #333333;
+        }
+        button.number:hover {
+            background-color: #BDBDBD;
+        }
+        button.equals {
+            background-color: #e24a4a;
+            color: white;
+            grid-column: span 5;
+        }
+        button.equals:hover {
+            background-color: #560404;
+        }
+        .rgb-button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #e24a4a;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <button class="rgb-button" onclick="changeOperatorColor()">where magic begins</button>
+    <div class="calculator">
+        <input type="text" id="screen" class="screen" disabled />
+        <div class="buttons">
+            <button class="operator" onclick="clearScreen()">C</button>
+            <button class="operator" onclick="deleteLast()">DEL</button>
+            <button class="operator" onclick="setOperation('sqrt')">√</button>
+            <button class="operator" onclick="setOperation('log')">log</button>
+            <button class="operator" onclick="setOperation('/')">÷</button>
+
+            <button class="operator" onclick="setOperation('sin')">sin</button>
+            <button class="operator" onclick="setOperation('cos')">cos</button>
+            <button class="operator" onclick="setOperation('tan')">tan</button>
+            <button class="operator" onclick="setOperation('pow')">^</button>
+            <button class="operator" onclick="appendToScreen(Math.PI.toFixed(5))">π</button>
+
+            <button class="number" onclick="appendToScreen('7')">7</button>
+            <button class="number" onclick="appendToScreen('8')">8</button>
+            <button class="number" onclick="appendToScreen('9')">9</button>
+            <button class="operator" onclick="setOperation('*')">×</button>
+            <button class="operator" onclick="setOperation('pow10')">10^</button>
+
+            <button class="number" onclick="appendToScreen('4')">4</button>
+            <button class="number" onclick="appendToScreen('5')">5</button>
+            <button class="number" onclick="appendToScreen('6')">6</button>
+            <button class="operator" onclick="setOperation('-')">-</button>
+            <button class="operator" onclick="appendToScreen('e')">e</button>
+
+            <button class="number" onclick="appendToScreen('1')">1</button>
+            <button class="number" onclick="appendToScreen('2')">2</button>
+            <button class="number" onclick="appendToScreen('3')">3</button>
+            <button class="operator" onclick="setOperation('+')">+</button>
+            <button class="operator" onclick="setOperation('mod')">mod</button>
+
+            <button class="number" onclick="appendToScreen('0')">0</button>
+            <button class="number" onclick="appendToScreen('.')">.</button>
+            <button class="equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let currentInput = '';
+        let operation = null;
+        let previousInput = '';
+        const screen = document.getElementById('screen');
+
+        function appendToScreen(value) {
+            if (value === '.' && currentInput.includes('.')) return;
+            currentInput += value;
+            screen.value = currentInput;
+        }
+
+        function setOperation(op) {
+            if (['sqrt', 'log', 'sin', 'cos', 'tan', 'pow10'].includes(op)) {
+                calculateSpecial(op);
+                return;
+            }
+            if (currentInput === '' && previousInput === '') return;
+            if (currentInput !== '') calculate();
+            operation = op;
+            previousInput = currentInput;
+            currentInput = '';
+        }
+
+        function clearScreen() {
+            currentInput = '';
+            previousInput = '';
+            operation = null;
+            screen.value = '';
+        }
+
+        function deleteLast() {
+            currentInput = currentInput.slice(0, -1);
+            screen.value = currentInput;
+        }
+
+        function calculateSpecial(op) {
+            let result;
+            const current = parseFloat(currentInput);
+
+            if (op === 'sqrt') result = Math.sqrt(current);
+            else if (op === 'log') result = Math.log10(current);
+            else if (op === 'pow10') result = Math.pow(10, current);
+            else if (op === 'sin') result = Math.sin(current * Math.PI / 180);
+            else if (op === 'cos') result = Math.cos(current * Math.PI / 180);
+            else if (op === 'tan') result = Math.tan(current * Math.PI / 180);
+
+            currentInput = result.toString();
+            screen.value = currentInput;
+        }
+
+        function calculate() {
+            if (operation === null || currentInput === '') return;
+            let result;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+
+            switch (operation) {
+                case '+': result = prev + current; break;
+                case '-': result = prev - current; break;
+                case '*': result = prev * current; break;
+                case '/': result = current === 0 ? 'Error' : prev / current; break;
+                case 'pow': result = Math.pow(prev, current); break;
+                case 'mod': result = prev % current; break;
+                default: return;
+            }
+
+            currentInput = result.toString();
+            screen.value = currentInput;
+            previousInput = currentInput;
+            currentInput = '';
+            operation = null;
+        }
+
+        window.addEventListener('keydown', function(event) {
+            if (!isNaN(event.key) || event.key === '.') appendToScreen(event.key);
+            else if (['+', '-', '*', '/'].includes(event.key)) setOperation(event.key);
+            else if (event.key === 'Enter') calculate();
+            else if (event.key.toLowerCase() === 'c') clearScreen();
+            else if (event.key === 'Backspace') deleteLast();
+        });
+
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function changeOperatorColor() {
+            const operators = document.querySelectorAll('.operator');
+            operators.forEach(button => {
+                button.style.backgroundColor = getRandomColor();
+            });
+        }
+    </script>
+</body>
+</html>
